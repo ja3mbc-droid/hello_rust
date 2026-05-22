@@ -1,20 +1,24 @@
 use std::process::Command;
+use std::{thread, time::Duration};
 
 fn main() {
-    let output = Command::new("sensors")
-        .output()
-        .expect("sensors コマンド実行失敗");
+    loop {
+        let output = Command::new("sensors")
+            .output()
+            .expect("sensors を実行できません");
 
-    let text = String::from_utf8_lossy(&output.stdout);
+        let result = String::from_utf8_lossy(&output.stdout);
 
-    println!("=== CPU Temperature Monitor ===");
+        print!("\x1B[2J\x1B[1;1H"); // 画面クリア
 
-    for line in text.lines() {
-        if line.contains("Package id")
-            || line.contains("Core ")
-            || line.contains("temp1")
-        {
-            println!("{}", line.trim());
+        for line in result.lines() {
+            if line.contains("temp1") {
+                println!("CPU温度監視");
+                println!("----------------");
+                println!("{}", line);
+            }
         }
+
+        thread::sleep(Duration::from_secs(1));
     }
 }
